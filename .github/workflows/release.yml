@@ -1,0 +1,40 @@
+name: "Release package"
+
+on:
+  release:
+    types: [published]
+
+jobs:
+
+  maven:
+    name: Release JAR package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.1.0
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: |
+          mvn --batch-mode --update-snapshots package
+
+      - name: Upload package as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: fairdata-keycloak-theme
+          path: target/fairdata-keycloak-theme.jar
+          retention-days: 5
+
+      - name: Upload release assets
+        uses: shogo82148/actions-upload-release-asset@v1
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: target/fairdata-keycloak-theme.jar
